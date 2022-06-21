@@ -10,11 +10,7 @@ public class SceneController : MonoBehaviour
     public float camMoveSpeed;
     public float[] BoundsX = new float[] { -4f, 10f };
     public float[] BoundsZ = new float[] { -4f, 4f };
-    public StrategyCamera strategyCam;
-
-    [Header("Input settings :")]
-    public Input_Strategy input_Strategy;
-    private Rect rect;
+    private StrategyCamera strategyCam;
 
     [Header("Scene units :")]
     public List<GameObject> sceneUnits_obj = new List<GameObject>();
@@ -33,8 +29,8 @@ public class SceneController : MonoBehaviour
     private void Awake()
     {
         Setup_Camera();
-        Setup_Input();
 
+        // Test
         Add_Player("hum_Player", false, Color.green);
         Add_Player("ai_Player", true, Color.red);
     }
@@ -46,7 +42,6 @@ public class SceneController : MonoBehaviour
 
     private void Update()
     {
-        input_Strategy.Update();
         Unit_Update();
 
         // Test
@@ -59,16 +54,6 @@ public class SceneController : MonoBehaviour
     private void LateUpdate()
     {
         strategyCam.LateUpdate();
-    }
-
-    private void OnGUI()
-    {
-        if (input_Strategy.isDraggingMouseBox)
-        {
-            rect = input_Strategy.sb_constructor.GetScreenRect(input_Strategy.drag_StartPos, Input.mousePosition);
-            input_Strategy.sb_constructor.DrawScreenRect(rect, new Color(0.5f, 1f, 0.4f, 0.2f));
-            input_Strategy.sb_constructor.DrawScreenRectBorder(rect, 1, new Color(0.5f, 1f, 0.4f));
-        }
     }
 
     #region Units
@@ -95,13 +80,6 @@ public class SceneController : MonoBehaviour
 
         foreach (Unit unit in sceneUnits)
             unit.Update();
-    }
-
-    private void OnTriggerEnter(Collider other)
-    {
-        // NEED FOR SELECTION
-        Unit someUnit = input_Strategy.Get_Unit_byGo(other.gameObject);
-        someUnit.Select();
     }
     #endregion
 
@@ -175,11 +153,6 @@ public class SceneController : MonoBehaviour
     {
         Transform camPivot_obj = Camera.main.transform.parent;
         strategyCam = new StrategyCamera(camPivot_obj, camMoveSpeed, BoundsX, BoundsZ);
-    }
-
-    private void Setup_Input()
-    {
-        input_Strategy = new Input_Strategy();
     }
     #endregion
 }

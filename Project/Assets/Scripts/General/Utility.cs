@@ -53,4 +53,13 @@ public static class Utility
 
         return null;
     }
+
+    public static Unit Get_Unit_byGo(GameObject go)
+    {
+        foreach (Unit unit in SceneController.scene.sceneUnits)
+            if (unit.go == go)
+                return unit;
+
+        return null;
+    }
 }

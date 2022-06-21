@@ -2,18 +2,21 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Input_Strategy
+public class Input_Strategy : MonoBehaviour
 {
-    public SelectBox_Constructor sb_constructor;
+    public Color selectBoxColor = new Color(0.5f, 1f, 0.4f, 0.2f);
+    public Color selectBoxBorderColor = new Color(0.5f, 1f, 0.4f);
+
+    private SelectBox_Constructor sb_constructor;
+
+    private bool isDraggingMouseBox = false;
+    private Vector3 drag_StartPos;
+    private Vector3 drag_EndPos;
 
     private Ray mouseRay;
     private RaycastHit mouseHit;
 
-    public bool isDraggingMouseBox = false;
-    public Vector3 drag_StartPos;
-    private Vector3 drag_EndPos;
-
-    public Input_Strategy()
+    private void Awake()
     {
         sb_constructor = new SelectBox_Constructor();
     }
@@ -51,23 +54,38 @@ public class Input_Strategy
         }
     }
 
+    private void OnGUI()
+    {
+        if (isDraggingMouseBox)
+        {
+            Rect rect_ui = sb_constructor.GetScreenRect(drag_StartPos);
+            sb_constructor.DrawScreenRect(rect_ui, selectBoxColor);
+            sb_constructor.DrawScreenRectBorder(rect_ui, 1, selectBoxBorderColor);
+        }
+    }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        Unit someUnit = Utility.Get_Unit_byGo(other.gameObject);
+        someUnit.Select();
+    }
+
     private void Mouse_RightClick()
     {
         GameObject clickedObject = Utility.Get_ClickedObject();
-        Unit clickedUnit = Get_Unit_byGo(clickedObject);
+        Unit clickedUnit = Utility.Get_Unit_byGo(clickedObject);
         switch (clickedObject.tag)
         {
-            // terrain click
             case "Terrain":
                 SceneController.scene.Order_Move(Utility.Get_NavMeshPoint(Utility.Get_MouseWorldPos()));
                 break;
             case "Unit":
-                // enemy click
+                // Enemy click
                 if (SceneController.scene.selectedUnits[0].owner != clickedUnit.owner)
                 {
                     SceneController.scene.Order_Attack(clickedUnit);
                 }
-                // ally click
+                // Ally click
                 else
                 {
                     SceneController.scene.Order_Move(Utility.Get_NavMeshPoint(Utility.Get_MouseWorldPos()));
@@ -117,18 +135,9 @@ public class Input_Strategy
         {
             if (mouseHit.collider.CompareTag("Unit"))
             {
-                return Get_Unit_byGo(mouseHit.collider.gameObject);
+                return Utility.Get_Unit_byGo(mouseHit.collider.gameObject);
             }
         }
-
-        return null;
-    }
-
-    public Unit Get_Unit_byGo(GameObject go)
-    {
-        foreach (Unit unit in SceneController.scene.sceneUnits)
-            if (unit.go == go)
-                return unit;
 
         return null;
     }

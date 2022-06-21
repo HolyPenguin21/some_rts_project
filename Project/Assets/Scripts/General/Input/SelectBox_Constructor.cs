@@ -1,17 +1,15 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class SelectBox_Constructor
 {
     public MeshCollider selectionBox;
     public Mesh selectionMesh;
-    public Vector2[] corners;
-    public Vector3[] verts;
+    private Vector2[] corners;
+    private Vector3[] verts;
 
     private Texture2D _whiteTexture;
 
-    #region Create mesh
+    #region Collider mesh
     public void Set_Verts(Ray mouseRay, RaycastHit mouseHit, Vector3 drag_StartPos, Vector3 drag_EndPos)
     {
         verts = new Vector3[4];
@@ -116,8 +114,11 @@ public class SelectBox_Constructor
         DrawScreenRect(new Rect(rect.xMin, rect.yMax - thickness, rect.width, thickness), color);
     }
 
-    public Rect GetScreenRect(Vector3 screenPosition1, Vector3 screenPosition2)
+    public Rect GetScreenRect(Vector3 drag_StartPos)
     {
+        Vector3 screenPosition1 = drag_StartPos;
+        Vector3 screenPosition2 = Input.mousePosition;
+
         // Move origin from bottom left to top left
         screenPosition1.y = Screen.height - screenPosition1.y;
         screenPosition2.y = Screen.height - screenPosition2.y;
