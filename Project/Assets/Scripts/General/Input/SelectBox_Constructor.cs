@@ -2,15 +2,31 @@ using UnityEngine;
 
 public class SelectBox_Constructor
 {
-    public MeshCollider selectionBox;
-    public Mesh selectionMesh;
+    private Ray mouseRay;
+    private RaycastHit mouseHit;
+    private Vector3 drag_StartPos;
+    private Vector3 drag_EndPos;
     private Vector2[] corners;
     private Vector3[] verts;
+    private MeshCollider selectionBox;
+    private Mesh selectionMesh;
 
     private Texture2D _whiteTexture;
 
     #region Collider mesh
-    public void Set_Verts(Ray mouseRay, RaycastHit mouseHit, Vector3 drag_StartPos, Vector3 drag_EndPos)
+    public void Create_SelectBoxMesh(Vector3 drag_StartPos, Vector3 drag_EndPos)
+    {
+        this.drag_StartPos = drag_StartPos;
+        this.drag_EndPos = drag_EndPos;
+
+        Set_Verts();
+        selectionMesh = generateSelectionMesh();
+        Set_Components(SceneController.scene.gameObject);
+
+        MonoBehaviour.Destroy(selectionBox, 0.02f);
+    }
+
+    private void Set_Verts()
     {
         verts = new Vector3[4];
         int i = 0;
@@ -30,9 +46,8 @@ public class SelectBox_Constructor
         }
     }
 
-    Vector2[] getBoundingBox(Vector2 p1, Vector2 p2)
+    private Vector2[] getBoundingBox(Vector2 p1, Vector2 p2)
     {
-        // Min and Max to get 2 corners of rectangle regardless of drag direction.
         var bottomLeft = Vector3.Min(p1, p2);
         var topRight = Vector3.Max(p1, p2);
 
@@ -47,7 +62,7 @@ public class SelectBox_Constructor
         return corners;
     }
 
-    public Mesh generateSelectionMesh()
+    private Mesh generateSelectionMesh()
     {
         Vector3[] someVerts = new Vector3[8];
         int[] tris = { 0, 1, 2, 2, 1, 3, 4, 6, 0, 0, 6, 2, 6, 7, 2, 2, 7, 3, 7, 5, 3, 3, 5, 1, 5, 0, 1, 1, 4, 0, 4, 5, 6, 6, 5, 7 };
@@ -70,7 +85,7 @@ public class SelectBox_Constructor
         return selectionMesh;
     }
 
-    public void Set_Components(GameObject obj)
+    private void Set_Components(GameObject obj)
     {
         selectionBox = obj.AddComponent<MeshCollider>();
         selectionBox.sharedMesh = selectionMesh;
@@ -80,7 +95,7 @@ public class SelectBox_Constructor
     #endregion
 
     #region Draw select box
-    public Texture2D WhiteTexture
+    private Texture2D WhiteTexture
     {
         get
         {

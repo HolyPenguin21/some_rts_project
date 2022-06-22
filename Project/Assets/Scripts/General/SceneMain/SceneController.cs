@@ -10,7 +10,6 @@ public class SceneController : MonoBehaviour
     public float camMoveSpeed;
     public float[] BoundsX = new float[] { -4f, 10f };
     public float[] BoundsZ = new float[] { -4f, 4f };
-    private StrategyCamera strategyCam;
 
     [Header("Scene units :")]
     public List<GameObject> sceneUnits_obj = new List<GameObject>();
@@ -20,15 +19,13 @@ public class SceneController : MonoBehaviour
     [Header("Scene players :")]
     public List<Player> players = new List<Player>();
 
-    [Header("Movement :")]
-    private Vector3 basePos;
-    private Vector3 offset;
-    private Vector3 uPos;
-    private Vector3 resultPos;
+    private StrategyCamera strategyCam;
+    public Orders orders;
 
     private void Awake()
     {
         Setup_Camera();
+        Setup_Orders();
 
         // Test
         Add_Player("hum_Player", false, Color.green);
@@ -98,61 +95,27 @@ public class SceneController : MonoBehaviour
     }
     #endregion
 
-    #region Orders
-    public void Order_Move(Vector3 pos)
-    {
-        if (selectedUnits.Count == 0) return;
-
-        if (selectedUnits.Count == 1)
-        {
-            basePos = selectedUnits[0].tr.position;
-        }
-        else
-        {
-            Bounds bounds = new Bounds(selectedUnits[0].tr.position, Vector3.zero);
-            for (int i = 1; i < selectedUnits.Count; i++)
-                bounds.Encapsulate(selectedUnits[i].tr.position);
-
-            basePos = bounds.center;
-        }
-
-        foreach (Unit unit in selectedUnits)
-        {
-            unit.target = null;
-
-            uPos = unit.tr.position;
-            offset = uPos - basePos;
-            resultPos = Utility.Get_NavMeshPoint(pos + offset);
-
-            unit.Order_MoveTo(resultPos);
-        }
-    }
-
-    public void Order_Attack(Unit targetUnit)
-    {
-        foreach (Unit unit in selectedUnits)
-        {
-            unit.Order_Attack(targetUnit);
-        }
-    }
-    #endregion
-
     #region Setup
-    private void Add_Player(string playerName, bool isAi, Color color)
-    {
-        players.Add(new Player(playerName, isAi, color));
-    }
-
     private void Set_Singletone()
     {
         if (scene == null) scene = this;
         else Destroy(gameObject);
     }
 
+    private void Add_Player(string playerName, bool isAi, Color color)
+    {
+        players.Add(new Player(playerName, isAi, color));
+    }
+
     private void Setup_Camera()
     {
         Transform camPivot_obj = Camera.main.transform.parent;
         strategyCam = new StrategyCamera(camPivot_obj, camMoveSpeed, BoundsX, BoundsZ);
+    }
+
+    private void Setup_Orders()
+    {
+        orders = new Orders();
     }
     #endregion
 }

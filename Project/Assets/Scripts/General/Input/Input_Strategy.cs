@@ -13,9 +13,6 @@ public class Input_Strategy : MonoBehaviour
     private Vector3 drag_StartPos;
     private Vector3 drag_EndPos;
 
-    private Ray mouseRay;
-    private RaycastHit mouseHit;
-
     private void Awake()
     {
         sb_constructor = new SelectBox_Constructor();
@@ -56,12 +53,12 @@ public class Input_Strategy : MonoBehaviour
 
     private void OnGUI()
     {
-        if (isDraggingMouseBox)
-        {
-            Rect rect_ui = sb_constructor.GetScreenRect(drag_StartPos);
-            sb_constructor.DrawScreenRect(rect_ui, selectBoxColor);
-            sb_constructor.DrawScreenRectBorder(rect_ui, 1, selectBoxBorderColor);
-        }
+        if (!isDraggingMouseBox) return;
+
+        Rect rect_ui = sb_constructor.GetScreenRect(drag_StartPos);
+        sb_constructor.DrawScreenRect(rect_ui, selectBoxColor);
+        sb_constructor.DrawScreenRectBorder(rect_ui, 1, selectBoxBorderColor);
+
     }
 
     private void OnTriggerEnter(Collider other)
@@ -74,21 +71,23 @@ public class Input_Strategy : MonoBehaviour
     {
         GameObject clickedObject = Utility.Get_ClickedObject();
         Unit clickedUnit = Utility.Get_Unit_byGo(clickedObject);
+
         switch (clickedObject.tag)
         {
             case "Terrain":
-                SceneController.scene.Order_Move(Utility.Get_NavMeshPoint(Utility.Get_MouseWorldPos()));
+                SceneController.scene.orders.Order_Move(Utility.Get_NavMeshPoint(Utility.Get_MouseWorldPos()));
                 break;
+
             case "Unit":
                 // Enemy click
                 if (SceneController.scene.selectedUnits[0].owner != clickedUnit.owner)
                 {
-                    SceneController.scene.Order_Attack(clickedUnit);
+                    SceneController.scene.orders.Order_Attack(clickedUnit);
                 }
                 // Ally click
                 else
                 {
-                    SceneController.scene.Order_Move(Utility.Get_NavMeshPoint(Utility.Get_MouseWorldPos()));
+                    SceneController.scene.orders.Order_Move(Utility.Get_NavMeshPoint(Utility.Get_MouseWorldPos()));
                 }
                 break;
         }
@@ -96,7 +95,7 @@ public class Input_Strategy : MonoBehaviour
 
     private void Select_Unit()
     {
-        Unit clickedUnit = Get_ClickedUnit();
+        Unit clickedUnit = Utility.Get_Unit_byGo(Utility.Get_ClickedObject());
         if (clickedUnit == null)
         {
             DeselectAll();
@@ -116,30 +115,10 @@ public class Input_Strategy : MonoBehaviour
 
     private void Select_MultipleUnits()
     {
-        sb_constructor.Set_Verts(mouseRay, mouseHit, drag_StartPos, drag_EndPos);
-        sb_constructor.selectionMesh = sb_constructor.generateSelectionMesh();
-
-        sb_constructor.Set_Components(SceneController.scene.gameObject);
+        sb_constructor.Create_SelectBoxMesh(drag_StartPos, drag_EndPos);
 
         if (!Input.GetKey(KeyCode.LeftShift))
             DeselectAll();
-
-        MonoBehaviour.Destroy(sb_constructor.selectionBox, 0.02f);
-    }
-
-    #region Helpers
-    private Unit Get_ClickedUnit()
-    {
-        mouseRay = Camera.main.ScreenPointToRay(Input.mousePosition);
-        if (Physics.Raycast(mouseRay, out mouseHit, 50.0f))
-        {
-            if (mouseHit.collider.CompareTag("Unit"))
-            {
-                return Utility.Get_Unit_byGo(mouseHit.collider.gameObject);
-            }
-        }
-
-        return null;
     }
 
     private void DeselectAll()
@@ -149,5 +128,4 @@ public class Input_Strategy : MonoBehaviour
             unit.Deselect();
         }
     }
-    #endregion
 }
