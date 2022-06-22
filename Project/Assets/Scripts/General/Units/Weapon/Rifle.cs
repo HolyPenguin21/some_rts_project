@@ -15,7 +15,5 @@ public class Rifle : Weapon
 
         attackAnimation = new string[1];
         attackAnimation[0] = "infantry_combat_shoot_burst";
-
-        Setup();
     }
 }

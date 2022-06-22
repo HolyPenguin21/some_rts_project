@@ -75,19 +75,19 @@ public class Input_Strategy : MonoBehaviour
         switch (clickedObject.tag)
         {
             case "Terrain":
-                SceneController.scene.orders.Order_Move(Utility.Get_NavMeshPoint(Utility.Get_MouseWorldPos()));
+                SceneController.scene.orders.Move(Utility.Get_NavMeshPoint(Utility.Get_MouseWorldPos()));
                 break;
 
             case "Unit":
                 // Enemy click
                 if (SceneController.scene.selectedUnits[0].owner != clickedUnit.owner)
                 {
-                    SceneController.scene.orders.Order_Attack(clickedUnit);
+                    SceneController.scene.orders.Attack(clickedUnit);
                 }
                 // Ally click
                 else
                 {
-                    SceneController.scene.orders.Order_Move(Utility.Get_NavMeshPoint(Utility.Get_MouseWorldPos()));
+                    SceneController.scene.orders.Move(Utility.Get_NavMeshPoint(Utility.Get_MouseWorldPos()));
                 }
                 break;
         }

@@ -16,7 +16,7 @@ public class Health
         this.health_Cur = this.health_Max;
     }
 
-    public void ReduceHealth(int value)
+    public void Reduce(int value)
     {
         health_Cur -= value;
 
@@ -26,7 +26,7 @@ public class Health
         }
     }
 
-    public void AddHealth(int value)
+    public void Add(int value)
     {
         health_Cur += value;
 

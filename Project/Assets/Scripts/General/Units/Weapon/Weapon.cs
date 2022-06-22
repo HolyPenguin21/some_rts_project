@@ -14,31 +14,26 @@ public abstract class Weapon
 
     public string[] attackAnimation;
 
-    public void Setup()
+    public void Update()
+    {
+        Timers_Update();
+    }
+
+    public string Get_AttackAnimation()
+    { 
+        return attackAnimation[Random.Range(0, attackAnimation.Length)];
+    }
+
+    public void Set_Reload()
     {
         reload_Cur = reload_Max;
     }
 
-    public void Update()
+    private void Timers_Update()
     {
         if (reload_Cur > 0)
             reload_Cur -= Time.deltaTime;
     }
 
-    public IEnumerator Shoot()
-    {
-        unit.canMove = false;
 
-        unit.animate.Play_AttackAnimation(attackAnimation[Random.Range(0, attackAnimation.Length)]);
-        float aTimer = unit.animate.animClip_Cur.length;
-        while (aTimer > 0)
-        {
-            aTimer -= Time.deltaTime;
-            yield return null;
-        }
-
-        unit.animate.animClip_Cur = null;
-        unit.canMove = true;
-        reload_Cur = reload_Max;
-    }
 }

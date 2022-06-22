@@ -28,7 +28,7 @@ public class Animate
 
     private void Movement()
     {
-        if (animClip_Cur != null) return;
+        if (unit.attack_cor != null) return;
 
         if (agent.velocity.magnitude > 0.1f)
         {

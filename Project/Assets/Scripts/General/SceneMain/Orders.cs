@@ -10,7 +10,7 @@ public class Orders
     private Vector3 uPos;
     private Vector3 resultPos;
 
-    public void Order_Move(Vector3 pos)
+    public void Move(Vector3 pos)
     {
         scene = SceneController.scene;
 
@@ -41,7 +41,7 @@ public class Orders
         }
     }
 
-    public void Order_Attack(Unit targetUnit)
+    public void Attack(Unit targetUnit)
     {
         foreach (Unit unit in SceneController.scene.selectedUnits)
         {

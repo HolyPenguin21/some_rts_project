@@ -8,7 +8,10 @@ public abstract class Unit
 {
     public GameObject go;
     public Transform tr;
+
     public NavMeshAgent agent;
+    public Animate animate;
+
     private GameObject selectionCircle;
     public Transform attackPoint;
 
@@ -18,13 +21,11 @@ public abstract class Unit
     public Weapon weapon;
     public Health health;
 
-    public Animate animate;
-
-    public bool canMove = true;
+    public IEnumerator attack_cor;
 
     public void Update()
     {
-        TrackTarget();
+        Target_Track();
 
         Check_MovementStop();
 
@@ -33,7 +34,7 @@ public abstract class Unit
     }
 
     #region Target
-    private void TrackTarget()
+    private void Target_Track()
     {
         if (target == null) return;
 
@@ -44,7 +45,7 @@ public abstract class Unit
         else
         {
             Target_Rotation();
-            Attack();
+            Target_Attack();
         }
     }
 
@@ -56,14 +57,33 @@ public abstract class Unit
         tr.rotation = Quaternion.Slerp(tr.rotation, rotation, Time.deltaTime * 20.0f);
     }
 
-    private void Attack()
+    private void Target_Attack()
     {
         agent.ResetPath();
 
-        if (weapon.reload_Cur > 0 || animate.animClip_Cur != null) return;
+        if (weapon.reload_Cur > 0 || attack_cor != null) return;
 
-        SceneController.scene.StartCoroutine(weapon.Shoot());
+        attack_cor = Attack_cor();
+
+        SceneController.scene.StartCoroutine(Attack_cor());
         SceneController.scene.Create_Bullet(attackPoint, target.tr.position + Vector3.up);
+    }
+
+    private IEnumerator Attack_cor()
+    {
+        animate.Play_AttackAnimation(weapon.Get_AttackAnimation());
+        float aTimer = animate.animClip_Cur.length;
+
+        while (aTimer > 0)
+        {
+            aTimer -= Time.deltaTime;
+            yield return null;
+        }
+
+        animate.animClip_Cur = null;
+        attack_cor = null;
+
+        weapon.Set_Reload();
     }
     #endregion
 
@@ -78,7 +98,7 @@ public abstract class Unit
 
     public void Order_MoveTo(Vector3 pos)
     {
-        if (!canMove)
+        if (attack_cor != null)
         {
             return;
         }
