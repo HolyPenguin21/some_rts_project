@@ -22,10 +22,13 @@ public class SceneController : MonoBehaviour
     private StrategyCamera strategyCam;
     public Orders orders;
 
+    private FollowTarget[] bullet_Effects;
+
     private void Awake()
     {
         Setup_Camera();
         Setup_Orders();
+        Setup_Bullet_Effects_Pooling(50);
 
         // Test
         Add_Player("hum_Player", false, Color.green);
@@ -40,11 +43,16 @@ public class SceneController : MonoBehaviour
     private void Update()
     {
         Unit_Update();
+        Update_BulletEffects();
 
         // Test
-        if(Input.GetKey(KeyCode.Alpha1))
+        if (Input.GetKey(KeyCode.Alpha1))
             Create_Unit(Utility.Get_NavMeshPoint(Utility.Get_MouseWorldPos()), 1, players[0]);
         if (Input.GetKey(KeyCode.Alpha2))
+            Create_Unit(Utility.Get_NavMeshPoint(Utility.Get_MouseWorldPos()), 1, players[1]);
+        if (Input.GetKeyDown(KeyCode.Alpha3))
+            Create_Unit(Utility.Get_NavMeshPoint(Utility.Get_MouseWorldPos()), 1, players[0]);
+        if (Input.GetKeyDown(KeyCode.Alpha4))
             Create_Unit(Utility.Get_NavMeshPoint(Utility.Get_MouseWorldPos()), 1, players[1]);
     }
 
@@ -81,17 +89,33 @@ public class SceneController : MonoBehaviour
     #endregion
 
     #region Effects
-    public void Create_Bullet(Transform parent, Vector3 target)
+    private void Update_BulletEffects()
     {
-        Vector3 dir = target - parent.position;
-        Vector3 dir_norm = dir.normalized * 1.5f;
-        GameObject bullet_go = MonoBehaviour.Instantiate(Resources.Load("Effects/Bullet", typeof(GameObject)), parent.position + dir_norm, Quaternion.identity) as GameObject;
-        
-        ParticleSystem bullet_part = bullet_go.GetComponent<ParticleSystem>();
-        var main = bullet_part.main;
-        main.startLifetime = dir.magnitude / main.startSpeed.constant - 0.025f;
+        foreach (FollowTarget bullet in bullet_Effects)
+            bullet.Update();
+    }
 
-        bullet_go.transform.LookAt(target);
+    public void Activate_BulletEffect(Transform attackPoint, Unit target)
+    {
+        FollowTarget bullet = Get_FreeBullet();
+        bullet.Set_Target(target);
+        bullet.Set_Position(attackPoint);
+        bullet.Set_Lifetime();
+        bullet.Set_Active();
+    }
+
+    private FollowTarget Get_FreeBullet()
+    {
+        foreach (FollowTarget bullet in bullet_Effects)
+        {
+            if (!bullet.go.activeInHierarchy)
+            {
+                return bullet;
+            }
+        }
+
+        Debug.LogError("Missing bullet prefabs, add more into pool");
+        return null;
     }
     #endregion
 
@@ -116,6 +140,30 @@ public class SceneController : MonoBehaviour
     private void Setup_Orders()
     {
         orders = new Orders();
+    }
+
+    private void Setup_Bullet_Effects_Pooling(int count)
+    {
+        GameObject holder_obj = GameObject.Find("Bullet_Effects");
+        if (holder_obj == null)
+        {
+            holder_obj = new GameObject("Bullet_Effects");
+        }
+
+        bullet_Effects = new FollowTarget[count];
+
+        for (int i = 0; i < count; i++)
+        {
+            GameObject bullet_go = MonoBehaviour.Instantiate(Resources.Load("Effects/Bullet", typeof(GameObject)), new Vector3(0, -10, 0), Quaternion.identity) as GameObject;
+            bullet_go.transform.parent = holder_obj.transform;
+            bullet_go.SetActive(false);
+
+            ParticleSystem bullet_part = bullet_go.GetComponent<ParticleSystem>();
+
+            FollowTarget followTarget = new FollowTarget(bullet_go, bullet_part);
+
+            bullet_Effects[i] = followTarget;
+        }
     }
     #endregion
 }

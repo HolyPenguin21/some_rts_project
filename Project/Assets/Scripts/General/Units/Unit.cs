@@ -23,6 +23,8 @@ public abstract class Unit
 
     public IEnumerator attack_cor;
 
+    private Vector3 nextMove = Vector3.zero;
+
     public void Update()
     {
         Target_Track();
@@ -66,7 +68,7 @@ public abstract class Unit
         attack_cor = Attack_cor();
 
         SceneController.scene.StartCoroutine(Attack_cor());
-        SceneController.scene.Create_Bullet(attackPoint, target.tr.position + Vector3.up);
+        SceneController.scene.Activate_BulletEffect(attackPoint, target);
     }
 
     private IEnumerator Attack_cor()
@@ -84,6 +86,8 @@ public abstract class Unit
         attack_cor = null;
 
         weapon.Set_Reload();
+
+        Check_NextMove();
     }
     #endregion
 
@@ -100,6 +104,7 @@ public abstract class Unit
     {
         if (attack_cor != null)
         {
+            nextMove = pos;
             return;
         }
 
@@ -116,6 +121,14 @@ public abstract class Unit
             agent.ResetPath();
             animate.End_Of_Action();
         }
+    }
+
+    public void Check_NextMove()
+    {
+        if (nextMove == Vector3.zero) return;
+
+        Order_MoveTo(nextMove);
+        nextMove = Vector3.zero;
     }
     #endregion
 
