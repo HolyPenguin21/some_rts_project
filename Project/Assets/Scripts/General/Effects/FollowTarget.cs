@@ -10,9 +10,6 @@ public class FollowTarget
 
     private Unit target;
 
-    private Vector3 pos;
-    private Vector3 dir;
-
     public FollowTarget(GameObject go, ParticleSystem bullet_part)
     {
         this.go = go;
@@ -27,13 +24,13 @@ public class FollowTarget
 
     public void Set_Position(Transform attackPoint)
     {
-        pos = (target.tr.position - attackPoint.position).normalized * 1.5f;
+        Vector3 pos = (target.tr.position - attackPoint.position).normalized * 1.5f;
         tr.position = pos;
     }
 
     public void Set_Lifetime()
     {
-        dir = target.tr.position - tr.position;
+        Vector3 dir = target.tr.position - tr.position;
 
         var main = bullet_part.main;
         main.startLifetime = dir.magnitude / main.startSpeed.constant - 0.025f;

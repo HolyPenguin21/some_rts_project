@@ -2,36 +2,28 @@ using UnityEngine;
 
 public class SelectBox_Constructor
 {
-    private Ray mouseRay;
-    private RaycastHit mouseHit;
-    private Vector3 drag_StartPos;
-    private Vector3 drag_EndPos;
-    private Vector2[] corners;
     private Vector3[] verts;
-    private MeshCollider selectionBox;
-    private Mesh selectionMesh;
-
     private Texture2D _whiteTexture;
 
     #region Collider mesh
     public void Create_SelectBoxMesh(Vector3 drag_StartPos, Vector3 drag_EndPos)
     {
-        this.drag_StartPos = drag_StartPos;
-        this.drag_EndPos = drag_EndPos;
-
-        Set_Verts();
-        selectionMesh = generateSelectionMesh();
-        Set_Components(SceneController.scene.gameObject);
+        Set_Verts(drag_StartPos, drag_EndPos);
+        Mesh selectionMesh = generateSelectionMesh();
+        MeshCollider selectionBox = Set_Components(SceneController.scene.gameObject, selectionMesh);
 
         MonoBehaviour.Destroy(selectionBox, 0.02f);
     }
 
-    private void Set_Verts()
+    private void Set_Verts(Vector3 drag_StartPos, Vector3 drag_EndPos)
     {
+        Ray mouseRay;
+        RaycastHit mouseHit;
+
         verts = new Vector3[4];
         int i = 0;
         drag_EndPos = Input.mousePosition;
-        corners = getBoundingBox(drag_StartPos, drag_EndPos);
+        Vector2[]  corners = getBoundingBox(drag_StartPos, drag_EndPos);
 
         foreach (Vector2 corner in corners)
         {
@@ -85,12 +77,14 @@ public class SelectBox_Constructor
         return selectionMesh;
     }
 
-    private void Set_Components(GameObject obj)
+    private MeshCollider Set_Components(GameObject obj, Mesh selectionMesh)
     {
-        selectionBox = obj.AddComponent<MeshCollider>();
+        MeshCollider selectionBox = obj.AddComponent<MeshCollider>();
         selectionBox.sharedMesh = selectionMesh;
         selectionBox.convex = true;
         selectionBox.isTrigger = true;
+
+        return selectionBox;
     }
     #endregion
 
