@@ -8,6 +8,7 @@ public class FollowTarget
     private Transform tr;
     private ParticleSystem bullet_part;
 
+    private Transform attackPoint;
     private Unit target;
 
     public FollowTarget(GameObject go, ParticleSystem bullet_part)
@@ -22,18 +23,33 @@ public class FollowTarget
         this.target = target;
     }
 
-    public void Set_Position(Transform attackPoint)
+    public void Set_InitialPosition(Transform attackPoint)
     {
-        Vector3 pos = (target.tr.position - attackPoint.position).normalized * 1.5f;
-        tr.position = pos;
+        if (target == null) return;
+
+        this.attackPoint = attackPoint;
+        Vector3 dir = (target.tr.position - attackPoint.position).normalized * 1.5f;
+
+        tr.position = this.attackPoint.position + dir;
+    }
+
+    private Vector3 Set_CurrentPosition()
+    {
+        if (target == null) return attackPoint.position;
+
+        Vector3 dir = (target.tr.position - attackPoint.position).normalized * 1.5f;
+
+        return attackPoint.position + dir;
     }
 
     public void Set_Lifetime()
     {
-        Vector3 dir = target.tr.position - tr.position;
+        if (target == null) return;
+
+        Vector3 dist_Vector = target.tr.position - tr.position;
 
         var main = bullet_part.main;
-        main.startLifetime = dir.magnitude / main.startSpeed.constant - 0.025f;
+        main.startLifetime = dist_Vector.magnitude / main.startSpeed.constant - 0.025f;
     }
 
     public void Set_Active()
@@ -57,6 +73,9 @@ public class FollowTarget
     {
         if (target == null || !go.activeInHierarchy) return;
 
-        tr.LookAt(target.tr);
+        tr.position = Set_CurrentPosition();
+
+        Vector3 lookPos = target.tr.position + Vector3.up;
+        tr.LookAt(lookPos);
     }
 }

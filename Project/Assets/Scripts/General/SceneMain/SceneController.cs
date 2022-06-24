@@ -98,8 +98,11 @@ public class SceneController : MonoBehaviour
     public void Activate_BulletEffect(Transform attackPoint, Unit target)
     {
         FollowTarget bullet = Get_FreeBullet();
+
+        if (bullet == null) return;
+
         bullet.Set_Target(target);
-        bullet.Set_Position(attackPoint);
+        bullet.Set_InitialPosition(attackPoint);
         bullet.Set_Lifetime();
         bullet.Set_Active();
     }

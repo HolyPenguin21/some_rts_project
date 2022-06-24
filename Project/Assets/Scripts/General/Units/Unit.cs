@@ -61,30 +61,30 @@ public abstract class Unit
 
     private void Target_Attack()
     {
-        agent.ResetPath();
-
+        if (agent.hasPath) agent.ResetPath();
         if (weapon.reload_Cur > 0 || attack_cor != null) return;
 
         attack_cor = Attack_cor();
 
-        SceneController.scene.StartCoroutine(Attack_cor());
+        SceneController.scene.StartCoroutine(attack_cor);
         SceneController.scene.Activate_BulletEffect(attackPoint, target);
     }
 
     private IEnumerator Attack_cor()
     {
-        animate.Play_AttackAnimation(weapon.Get_AttackAnimation());
-        float aTimer = animate.animClip_Cur.length;
+        string animName = weapon.Get_AttackAnimation();
+        AnimationClip anim = animate.Get_AnimationClip(animName);
+        float animTime = anim.length;
+        
+        animate.Play_AttackAnimation(animName);
 
-        while (aTimer > 0)
+        while (animTime > 0)
         {
-            aTimer -= Time.deltaTime;
+            animTime -= Time.deltaTime;
             yield return null;
         }
 
-        animate.animClip_Cur = null;
         attack_cor = null;
-
         weapon.Set_Reload();
 
         Check_NextMove();

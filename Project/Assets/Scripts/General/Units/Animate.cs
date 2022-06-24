@@ -11,8 +11,6 @@ public class Animate
 
     private float idleTimer;
 
-    public AnimationClip animClip_Cur;
-
     public Animate(Unit unit)
     {
         this.unit = unit;
@@ -47,7 +45,11 @@ public class Animate
     public void Play_AttackAnimation(string animName)
     {
         anim.CrossFade(animName);
-        animClip_Cur = anim.GetClip(animName);
+    }
+
+    public AnimationClip Get_AnimationClip(string animName)
+    {
+        return anim.GetClip(animName);
     }
 
     public void End_Of_Action()
