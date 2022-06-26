@@ -10,7 +10,7 @@ public class SelectBox_Constructor
     {
         Set_Verts(drag_StartPos, drag_EndPos);
         Mesh selectionMesh = generateSelectionMesh();
-        MeshCollider selectionBox = Set_Components(SceneController.scene.gameObject, selectionMesh);
+        MeshCollider selectionBox = Set_Components(Utility.scene.gameObject, selectionMesh);
 
         MonoBehaviour.Destroy(selectionBox, 0.02f);
     }

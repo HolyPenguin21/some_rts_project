@@ -42,7 +42,8 @@ public abstract class Unit
 
         if (Get_DistToTarget() > weapon.range)
         {
-            Order_MoveTo(Utility.Get_NavMeshPoint(target.tr.position));
+            // Recheck behavior
+            if(!agent.hasPath) Order_MoveTo(Utility.Get_NavMeshPoint(target.tr.position));
         }
         else
         {
@@ -66,8 +67,8 @@ public abstract class Unit
 
         attack_cor = Attack_cor();
 
-        SceneController.scene.StartCoroutine(attack_cor);
-        SceneController.scene.Activate_BulletEffect(attackPoint, target);
+        Utility.scene.StartCoroutine(attack_cor);
+        Utility.scene.Activate_BulletEffect(attackPoint, target);
     }
 
     private IEnumerator Attack_cor()
@@ -155,26 +156,22 @@ public abstract class Unit
     #region Select/Deselect
     public void Select()
     {
-        if (SceneController.scene.selectedUnits.Contains(this)) return;
+        if (Utility.scene.selectedUnits.Contains(this)) return;
 
-        SceneController.scene.selectedUnits.Add(this);
+        Utility.scene.selectedUnits.Add(this);
         selectionCircle.SetActive(true);
 
         agent.avoidancePriority = 49;
-
-        //Debug.Log(go.name + " named " + name + " owned by " + owner.name + " selected");
     }
 
     public void Deselect()
     {
-        if (!SceneController.scene.selectedUnits.Contains(this)) return;
+        if (!Utility.scene.selectedUnits.Contains(this)) return;
 
-        SceneController.scene.selectedUnits.Remove(this);
+        Utility.scene.selectedUnits.Remove(this);
         selectionCircle.SetActive(false);
 
         agent.avoidancePriority = 50;
-
-        //Debug.Log(go.name + " named " + name + " owned by " + owner.name + " deselected");
     }
     #endregion
 

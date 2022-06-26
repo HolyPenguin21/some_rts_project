@@ -4,8 +4,6 @@ using UnityEngine;
 
 public class SceneController : MonoBehaviour
 {
-    public static SceneController scene = null;
-
     [Header("Camera settings :")]
     public float camMoveSpeed;
     public float[] BoundsX = new float[] { -4f, 10f };
@@ -20,24 +18,24 @@ public class SceneController : MonoBehaviour
     public List<Player> players = new List<Player>();
 
     private StrategyCamera strategyCam;
-    public Orders orders;
+    private Orders orders;
+    private UnitCreation unitCreation;
 
+    // Pooling objects
     private FollowTarget[] bullet_Effects;
 
     private void Awake()
     {
+        Utility.scene = this;
+
         Setup_Camera();
         Setup_Orders();
+        Setup_UnitCreation();
         Setup_Bullet_Effects_Pooling(50);
 
         // Test
         Add_Player("hum_Player", false, Color.green);
         Add_Player("ai_Player", true, Color.red);
-    }
-
-    private void Start()
-    {
-        Set_Singletone();
     }
 
     private void Update()
@@ -47,13 +45,13 @@ public class SceneController : MonoBehaviour
 
         // Test
         if (Input.GetKey(KeyCode.Alpha1))
-            Create_Unit(Utility.Get_NavMeshPoint(Utility.Get_MouseWorldPos()), 1, players[0]);
+        {
+            GlobalEvents.CreateUnit(Utility.Get_NavMeshPoint(Utility.Get_MouseWorldPos()), 1, players[0]);
+        }
         if (Input.GetKey(KeyCode.Alpha2))
-            Create_Unit(Utility.Get_NavMeshPoint(Utility.Get_MouseWorldPos()), 1, players[1]);
-        if (Input.GetKeyDown(KeyCode.Alpha3))
-            Create_Unit(Utility.Get_NavMeshPoint(Utility.Get_MouseWorldPos()), 1, players[0]);
-        if (Input.GetKeyDown(KeyCode.Alpha4))
-            Create_Unit(Utility.Get_NavMeshPoint(Utility.Get_MouseWorldPos()), 1, players[1]);
+        {
+            GlobalEvents.CreateUnit(Utility.Get_NavMeshPoint(Utility.Get_MouseWorldPos()), 1, players[1]);
+        }
     }
 
     private void LateUpdate()
@@ -61,19 +59,14 @@ public class SceneController : MonoBehaviour
         strategyCam.LateUpdate();
     }
 
-    #region Units
-    public void Create_Unit(Vector3 pos, int unitId, Player owner)
+    private void OnDisable()
     {
-        GameObject unit_go = MonoBehaviour.Instantiate(Resources.Load("Units/Soldier", typeof(GameObject)), pos, Quaternion.identity) as GameObject;
-        unit_go.name = "Soldier_" + sceneUnits.Count;
-
-        Soldier unit = new Soldier(unit_go, owner);
-        unit.name = "Soldier_" + sceneUnits.Count;
-
-        Add_UnitToScene(unit);
+        unitCreation.UnsubscribeEvents();
+        orders.UnsubscribeEvents();
     }
 
-    private void Add_UnitToScene(Unit unit)
+    #region Units
+    public void Add_UnitToScene(Unit unit)
     {
         sceneUnits.Add(unit);
         sceneUnits_obj.Add(unit.go);
@@ -123,12 +116,6 @@ public class SceneController : MonoBehaviour
     #endregion
 
     #region Setup
-    private void Set_Singletone()
-    {
-        if (scene == null) scene = this;
-        else Destroy(gameObject);
-    }
-
     private void Add_Player(string playerName, bool isAi, Color color)
     {
         players.Add(new Player(playerName, isAi, color));
@@ -143,6 +130,11 @@ public class SceneController : MonoBehaviour
     private void Setup_Orders()
     {
         orders = new Orders();
+    }
+
+    private void Setup_UnitCreation()
+    {
+        unitCreation = new UnitCreation();
     }
 
     private void Setup_Bullet_Effects_Pooling(int count)

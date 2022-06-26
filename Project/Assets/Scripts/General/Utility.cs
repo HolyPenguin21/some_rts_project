@@ -9,6 +9,9 @@ public static class Utility
     private static RaycastHit mouseHit;
     private static NavMeshHit navHit;
 
+    public static SceneController scene;
+
+    #region Mouse Input
     public static Vector3 Get_MouseWorldPos()
     {
         mouseRay = Camera.main.ScreenPointToRay(Input.mousePosition);
@@ -18,18 +21,6 @@ public static class Utility
         }
 
         return Vector3.zero;
-    }
-
-    public static Vector3 Get_NavMeshPoint(Vector3 pos)
-    {
-        Vector3 somePos = pos;
-
-        if (NavMesh.SamplePosition(somePos, out navHit, 50.0f, -1))
-        {
-            somePos = navHit.position;
-        }
-
-        return somePos;
     }
 
     public static GameObject Get_ClickedObject()
@@ -42,13 +33,30 @@ public static class Utility
 
         return null;
     }
+    #endregion
 
+    #region NavMesh
+    public static Vector3 Get_NavMeshPoint(Vector3 pos)
+    {
+        Vector3 somePos = pos;
+
+        if (NavMesh.SamplePosition(somePos, out navHit, 50.0f, -1))
+        {
+            somePos = navHit.position;
+        }
+
+        return somePos;
+    }
+    #endregion
+
+    #region Units
     public static Unit Get_Unit_byGo(GameObject go)
     {
-        foreach (Unit unit in SceneController.scene.sceneUnits)
+        foreach (Unit unit in scene.sceneUnits)
             if (unit.go == go)
                 return unit;
 
         return null;
     }
+    #endregion
 }
